@@ -1,14 +1,24 @@
+/*
+See LICENSE folder for this sample’s licensing information.
+
+Abstract:
+A visualization of a detected object, using either a loaded 3D asset or a simple bounding box.
+*/
+
 import Foundation
 import ARKit
 import SceneKit
 
 class DetectedObject: SCNNode {
     
-    var displayDuration: TimeInterval = 1.0 // Duração da visualização
+    var displayDuration: TimeInterval = 1.0 // How long this visualization is displayed in seconds after an update
+    
     private var detectedObjectVisualizationTimer: Timer?
     
     private let pointCloudVisualization: DetectedPointCloud
+    
     private var boundingBox: DetectedBoundingBox?
+    
     private var originVis: SCNNode
     private var customModel: SCNNode?
     
@@ -61,13 +71,12 @@ class DetectedObject: SCNNode {
     }
     
     func updateVisualization(newTransform: float4x4, currentPointCloud: ARPointCloud) {
-        // Atualiza a transformação do objeto
+        // Update the transform
         self.simdTransform = newTransform
         
-        // Atualiza a visualização dos pontos
+        // Update the point cloud visualization
         updatePointCloud(currentPointCloud)
         
-        // Se a caixa delimitadora não existir, cria uma nova com base nos pontos de referência
         if boundingBox == nil {
             let scale = CGFloat(referenceObject.scale.x)
             let boundingBox = DetectedBoundingBox(points: referenceObject.rawFeaturePoints.points, scale: scale)
@@ -76,7 +85,7 @@ class DetectedObject: SCNNode {
             self.boundingBox = boundingBox
         }
         
-        // Exibe a visualização por um tempo determinado
+        // This visualization should only displayed for displayDuration seconds on every update.
         self.detectedObjectVisualizationTimer?.invalidate()
         self.isHidden = false
         self.detectedObjectVisualizationTimer = Timer.scheduledTimer(withTimeInterval: displayDuration, repeats: false) { _ in
